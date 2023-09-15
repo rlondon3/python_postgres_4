@@ -1,17 +1,15 @@
-from flask import Flask, request, session, make_response, jsonify
-from dotenv import load_dotenv
+from flask import Flask
 from models.user import User_Store
-import psycopg2
-import os
-
+from database import connect
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
-url = os.getenv("DATABASE_URL")
-connection = psycopg2.connect(url)
 
 store = User_Store()
+
+@app.route("/")
+def connect_db():
+    return connect()
 
 @app.post("/admin/users") # Need to add auth to visit this route
 def get_users():
@@ -24,6 +22,7 @@ def get_users():
     
 @app.post("/user/signup")
 def create_account():
+    
     user = store.create()
     try:
         if user:

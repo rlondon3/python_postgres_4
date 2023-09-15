@@ -1,54 +1,15 @@
-from flask import Flask, request
+from flask import request
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
+from database import connection
+from migrations.sql.users.user_statements import ( GET_USER, GET_USERS, 
+                                                  CREATE_USERS_TABLE, INSERT_INTO_USERS_TABLE_RETURNING_ID, 
+                                                  UPDATE_USERS_TABLE_RETURNING_USER, DELETE_FROM_USERS_RETURNING_ID 
+                                                  )
 from werkzeug.security import generate_password_hash, check_password_hash
-import psycopg2
 import psycopg2.extras
-import os
 import re
 
 load_dotenv()
-
-app = Flask(__name__)
-url = os.getenv("DATABASE_URL")
-connection = psycopg2.connect(url)
-
-
-GET_USER = "SELECT * FROM users WHERE id = %s;"
-GET_USERS = "SELECT * FROM users;"
-CREATE_USERS_TABLE = """CREATE TABLE IF NOT EXISTS users (
-                        id SERIAL PRIMARY KEY, 
-                        first_name VARCHAR (100) NOT NULL, 
-                        last_name VARCHAR (100) NOT NULL,
-                        birthday DATE,
-                        city VARCHAR (100) NOT NULL,
-                        state VARCHAR (2) NOT NULL, 
-                        active BOOLEAN NOT NULL,
-                        user_name VARCHAR (50) NOT NULL,
-                        email VARCHAR (50) NOT NULL,
-                        password VARCHAR (255) NOT NULL
-                        )"""
-INSERT_INTO_USERS_TABLE_RETURNING_ID = """INSERT INTO users (
-                                        first_name, 
-                                        last_name,
-                                        birthday, 
-                                        city, 
-                                        state, 
-                                        active,
-                                        user_name, 
-                                        email, 
-                                        password
-                                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
-UPDATE_USERS_TABLE_RETURNING_USER = """UPDATE users SET 
-                                    first_name=(%s), 
-                                    last_name=(%s), 
-                                    birthday=(%s), city=(%s), 
-                                    state=(%s), 
-                                    active=(%s),
-                                    user_name=(%s), 
-                                    email=(%s), 
-                                    password=(%s) WHERE id=(%s) RETURNING *;"""
-DELETE_FROM_USERS_RETURNING_ID = "SELECT FROM users WHERE id = (%s);"
 
 class User_Store:
     def index(self):
@@ -104,7 +65,9 @@ class User_Store:
                 elif not user_name or not password or not email:
                     return {"message": "Invalid: please check username, email, and password."}
                 else:
-                    cursor.execute(INSERT_INTO_USERS_TABLE_RETURNING_ID, (first_name, last_name, birthday, city, state, active, user_name, email, generate_password_hash(password)))
+                    cursor.execute(INSERT_INTO_USERS_TABLE_RETURNING_ID, (first_name, last_name, birthday, 
+                                                                          city, state, active, user_name, email, generate_password_hash(password))
+                                                                          )
                     connection.commit()
                     return {"message": "User successful registered"}, 201
                 
@@ -126,7 +89,9 @@ class User_Store:
                     cursor.execute(GET_USER, (id,))
                     user = cursor.fetchone()
                     if user:
-                        cursor.execute(UPDATE_USERS_TABLE_RETURNING_USER, (first_name, last_name, birthday, city, state, active, user_name, email, generate_password_hash(password), id))
+                        cursor.execute(UPDATE_USERS_TABLE_RETURNING_USER, (first_name, last_name, birthday, 
+                                                                           city, state, active, user_name, email, generate_password_hash(password), id)
+                                                                           )
                         connection.commit()
         except Exception as e:
             return {
