@@ -92,7 +92,7 @@ class User_Store:
         with connection:
             with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                 cursor.execute(CREATE_USERS_TABLE)
-                cursor.execute(GET_USER, (user_name,))
+                cursor.execute(GET_USER, (user_name,)) # Need to change this to id in the SQL
                 user = cursor.fetchone()
                 if user:
                     return {"message": "User already exists. Please login."}
@@ -108,13 +108,26 @@ class User_Store:
                     connection.commit()
                     return {"message": "User successful registered"}, 201
                 
-    def update(self, USER):
+    def update(self):
         try:
-            user = USER
+            data = request.get_json()
+            id = data['id']
+            first_name = data['first_name']
+            last_name = data['last_name']
+            birthday = data['birthday']
+            city = data['city']
+            state = data['state']
+            active = data['active']
+            user_name = data['user_name']
+            email = data['email']
+            password = data['password']
             with connection:
                 with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-                    cursor.execute(UPDATE_USERS_TABLE_RETURNING_USER, (user.first_name, user.last_name, user.birthday, user.city, user.state, user.active, user.user_name, user.email, generate_password_hash(user.password), user.id))
-                    connection.commit()
+                    cursor.execute(GET_USER, (id,))
+                    user = cursor.fetchone()
+                    if user:
+                        cursor.execute(UPDATE_USERS_TABLE_RETURNING_USER, (first_name, last_name, birthday, city, state, active, user_name, email, generate_password_hash(password), id))
+                        connection.commit()
         except Exception as e:
             return {
                 "error": str(e)
