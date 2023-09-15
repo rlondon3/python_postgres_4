@@ -14,7 +14,7 @@ url = os.getenv("DATABASE_URL")
 connection = psycopg2.connect(url)
 
 
-GET_USER = "SELECT * FROM users WHERE user_name = %s;"
+GET_USER = "SELECT * FROM users WHERE id = %s;"
 GET_USERS = "SELECT * FROM users;"
 CREATE_USERS_TABLE = """CREATE TABLE IF NOT EXISTS users (
                         id SERIAL PRIMARY KEY, 
