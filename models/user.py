@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request
 from dotenv import load_dotenv
 from database import connection
 from migrations.sql.users.user_statements import ( GET_USER_BY_USERNAME, GET_USER_BY_ID, GET_USERS, 
@@ -11,8 +11,10 @@ import re
 
 load_dotenv()
 
+#Instantiate a class that holds user schema as methods
 class User_Store:
-    def index(self):
+    # Get all users
+    def index(self): 
         with connection:
             with connection.cursor() as cursor:
                 cursor.execute(GET_USERS)
@@ -22,7 +24,7 @@ class User_Store:
                     return user
                 else:
                     return {"error": "Users not found"}
-                
+    # Get user by id            
     def show(self, id):
         with connection:
             with connection.cursor() as cursor:
@@ -35,7 +37,7 @@ class User_Store:
                 except Exception as e:
                     cursor.close()
                     return {"error": str(e)}
-            
+    # Create a user        
     def create(self):
         data = request.get_json()
         first_name = data['first_name']
@@ -67,7 +69,7 @@ class User_Store:
                                                                           )
                     connection.commit()
                     return {"message": "User successful registered"}, 201
-                
+    # Update a user            
     def update(self, user_id):
         data = request.get_json()
         if user_id:
@@ -95,7 +97,7 @@ class User_Store:
                 return {
                     {"error": str(e)}
                 }
-
+    # Delete a user
     def delete(self, user_id):
         if user_id:
             try:
@@ -104,7 +106,6 @@ class User_Store:
                         cursor.execute(DELETE_FROM_USERS_RETURNING_ID, (user_id,))
                         connection.commit()
                         user = cursor.fetchone()[0]
-                        print(user, 'user')
                         return {"user id deleted": user}
 
             except Exception as e:

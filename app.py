@@ -1,24 +1,19 @@
 from flask import Flask
 from models.user import User_Store
+from handlers.user_handler import User_Handler  
 from database import connect
 
 
 app = Flask(__name__)
 
 store = User_Store()
+handler = User_Handler()
 
 @app.route("/")
 def connect_db():
     return connect()
 
-@app.post("/user/signup")
-def create_account():
-    try:
-        user = store.create()
-        if user:
-            return user
-    except Exception as e:
-        return {"error" : str(e)}
+app.add_url_rule("/users/signup", "create", handler.create_account, methods=["POST"])
 
 @app.post("/admin/users") # Need to add auth to visit this route
 def get_users():
