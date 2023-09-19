@@ -11,7 +11,7 @@ class User_Handler():
         except Exception as e:
             return {"error" : str(e)}
 
-    def get_users():
+    def get_users(self):
         try:
             users = store.index()
             if users: # Need error handling
@@ -19,7 +19,7 @@ class User_Handler():
         except Exception as e:
             return {"error": str(e)}, 404
         
-    def get_user(id):
+    def get_user(self, id):
         user_id = id
         try:
             user = store.show(user_id)
@@ -28,16 +28,16 @@ class User_Handler():
         except Exception as e:
             return {"error": str(e)}
 
-    def update_user(id):
+    def update_user(self, id):
         user_id = id
         try:
             user = store.update(user_id)
             if user:
-                return user
+                return {"updated user": user}
         except Exception as e:
             return {"error": str(e)}
 
-    def delete_user(id):
+    def delete_user(self, id):
         user_id = id
         try:
             user = store.delete(user_id)
@@ -45,4 +45,3 @@ class User_Handler():
                 return user
         except Exception as e:
             return {"error": str(e)}
-    
