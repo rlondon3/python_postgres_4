@@ -66,7 +66,8 @@ class User_Store:
                     return {"message": "Invalid: please check username, email, and password."}
                 else:
                     cursor.execute(INSERT_INTO_USERS_TABLE_RETURNING_ID, (first_name, last_name, birthday, 
-                                                                          city, state, zip, active, user_name, email, generate_password_hash(password))
+                                                                          city, state, zip, active, user_name, email, 
+                                                                          generate_password_hash(password))
                                                                           )
                     connection.commit()
                     return {"message": "User successful registered"}, 201
@@ -91,7 +92,8 @@ class User_Store:
                         user = cursor.fetchone()[0]
                         if user:
                             cursor.execute(UPDATE_USERS_TABLE_RETURNING_USER, (first_name, last_name, birthday, 
-                                                                            city, state, zip, active, user_name, email, generate_password_hash(password), user_id)
+                                                                            city, state, zip, active, user_name, email, 
+                                                                            generate_password_hash(password), user_id)
                                                                             )
                             connection.commit()
                             return user
