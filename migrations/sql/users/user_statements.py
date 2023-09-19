@@ -1,7 +1,8 @@
 
 
-GET_USER = "SELECT * FROM users WHERE user_name = %s;"
-GET_USERS = "SELECT * FROM users;"
+GET_USER_BY_USERNAME = "SELECT * FROM users WHERE user_name = %s;"
+GET_USER_BY_ID = "SELECT row_to_json(t) FROM users t WHERE id = %s;"
+GET_USERS = "SELECT row_to_json(t) FROM users t;" #returns key value pair
 CREATE_USERS_TABLE = """CREATE TABLE IF NOT EXISTS users (
                         id SERIAL PRIMARY KEY, 
                         first_name VARCHAR (100) NOT NULL, 
@@ -28,10 +29,11 @@ INSERT_INTO_USERS_TABLE_RETURNING_ID = """INSERT INTO users (
 UPDATE_USERS_TABLE_RETURNING_USER = """UPDATE users SET 
                                     first_name=(%s), 
                                     last_name=(%s), 
-                                    birthday=(%s), city=(%s), 
+                                    birthday=(%s), 
+                                    city=(%s), 
                                     state=(%s), 
                                     active=(%s),
                                     user_name=(%s), 
                                     email=(%s), 
                                     password=(%s) WHERE id=(%s) RETURNING *;"""
-DELETE_FROM_USERS_RETURNING_ID = "SELECT FROM users WHERE id = (%s);"
+DELETE_FROM_USERS_RETURNING_ID = "DELETE FROM users WHERE id=(%s) RETURNING *;"

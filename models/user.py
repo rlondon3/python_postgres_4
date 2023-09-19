@@ -1,7 +1,7 @@
-from flask import request
+from flask import request, jsonify
 from dotenv import load_dotenv
 from database import connection
-from migrations.sql.users.user_statements import ( GET_USER, GET_USERS, 
+from migrations.sql.users.user_statements import ( GET_USER_BY_USERNAME, GET_USER_BY_ID, GET_USERS, 
                                                   CREATE_USERS_TABLE, INSERT_INTO_USERS_TABLE_RETURNING_ID, 
                                                   UPDATE_USERS_TABLE_RETURNING_USER, DELETE_FROM_USERS_RETURNING_ID 
                                                   )
@@ -24,13 +24,11 @@ class User_Store:
                     return {"error": "Users not found"}
                 
     def show(self, id):
-        data = request.get_json()
-        id = data["id"]
         with connection:
             with connection.cursor() as cursor:
-                cursor.execute(GET_USER, (id,))
+                cursor.execute(GET_USER_BY_ID, (id,))
                 connection.commit()
-                user = cursor.fetchone()
+                user = cursor.fetchone()[0]
                 try:
                     if user:
                         return user
@@ -53,12 +51,11 @@ class User_Store:
         with connection:
             with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                 cursor.execute(CREATE_USERS_TABLE)
-                cursor.execute(GET_USER, (user_name,)) # Need to change this to id in the SQL
+                cursor.execute(GET_USER_BY_USERNAME, (user_name,)) # Need to change this to id in the SQL
                 user = cursor.fetchone()
                 if user:
                     return {"message": "User already exists. Please login."}
                 elif not re.match(r'[\w.]+\@[\w.]+', email):
-                    print(user_name, email, 'email')
                     return {"message": "Invalid: please check email address."}
                 elif not re.match(r'[A-Za-z0-9]+', user_name):
                     return {"message": "Invalid: username must contain only characters and numbers."}
@@ -71,42 +68,46 @@ class User_Store:
                     connection.commit()
                     return {"message": "User successful registered"}, 201
                 
-    def update(self):
-        try:
-            data = request.get_json()
-            id = data['id']
-            first_name = data['first_name']
-            last_name = data['last_name']
-            birthday = data['birthday']
-            city = data['city']
-            state = data['state']
-            active = data['active']
-            user_name = data['user_name']
-            email = data['email']
-            password = data['password']
-            with connection:
-                with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-                    cursor.execute(GET_USER, (id,))
-                    user = cursor.fetchone()
-                    if user:
-                        cursor.execute(UPDATE_USERS_TABLE_RETURNING_USER, (first_name, last_name, birthday, 
-                                                                           city, state, active, user_name, email, generate_password_hash(password), id)
-                                                                           )
+    def update(self, user_id):
+        data = request.get_json()
+        if user_id:
+            try:
+                first_name = data['first_name']
+                last_name = data['last_name']
+                birthday = data['birthday']
+                city = data['city']
+                state = data['state']
+                active = data['active']
+                user_name = data['user_name']
+                email = data['email']
+                password = data['password']
+                with connection:
+                    with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                        cursor.execute(GET_USER_BY_ID, (user_id,))
+                        user = cursor.fetchone()[0]
+                        if user:
+                            cursor.execute(UPDATE_USERS_TABLE_RETURNING_USER, (first_name, last_name, birthday, 
+                                                                            city, state, active, user_name, email, generate_password_hash(password), user_id)
+                                                                            )
+                            connection.commit()
+                            return user
+            except Exception as e:
+                return {
+                    {"error": str(e)}
+                }
+
+    def delete(self, user_id):
+        if user_id:
+            try:
+                with connection:
+                    with connection.cursor() as cursor:
+                        cursor.execute(DELETE_FROM_USERS_RETURNING_ID, (user_id,))
                         connection.commit()
-        except Exception as e:
-            return {
-                "error": str(e)
-            }
+                        user = cursor.fetchone()[0]
+                        print(user, 'user')
+                        return {"user id deleted": user}
 
-    def delete(self, id):
-        try:
-            with connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(DELETE_FROM_USERS_RETURNING_ID, (id,))
-                    connection.commit()
-                    return cursor.fetchone()[0]
-
-        except Exception as e:
-            return {
-                "error": str(e)
-            }
+            except Exception as e:
+                return {
+                    {"error": str(e)}
+                }
