@@ -110,7 +110,7 @@ class User_Store:
                         cursor.execute(DELETE_FROM_USERS_RETURNING_ID, (user_id,))
                         connection.commit()
                         user = cursor.fetchone()[0]
-                        return {"user id deleted": user}
+                        return {"user_id": user}
 
             except Exception as e:
                 return {
@@ -123,11 +123,11 @@ class User_Store:
                     cursor.execute(GET_USER_BY_USERNAME, (username,))
                     user = cursor.fetchone()
                     if user:
-                        password_rs = password
-                        if check_password_hash(password_rs, password):
-                            return {'authenticated user': user}
+                        hashed_password = user['password']
+                        if check_password_hash(hashed_password, password):
+                            return {"user": user}
                     else:
-                        return {'user:' "Not authenticated"}
+                        return {"message": "Account not found!"}
         except Exception as e:
             return {
                     {"error": str(e)}
