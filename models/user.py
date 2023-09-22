@@ -116,3 +116,19 @@ class User_Store:
                 return {
                     {"error": str(e)}
                 }
+    def authenticate(self, username, password):
+        try:
+            with connection:
+                with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                    cursor.execute(GET_USER_BY_USERNAME, (username,))
+                    user = cursor.fetchone()
+                    if user:
+                        password_rs = password
+                        if check_password_hash(password_rs, password):
+                            return {'authenticated user': user}
+                    else:
+                        return {'user:' "Not authenticated"}
+        except Exception as e:
+            return {
+                    {"error": str(e)}
+                }
