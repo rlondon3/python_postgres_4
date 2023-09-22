@@ -38,19 +38,7 @@ class User_Store:
                     cursor.close()
                     return {"error": str(e)}
     # Create a user        
-    def create(self):
-        data = request.get_json()
-        first_name = data['first_name']
-        last_name = data['last_name']
-        birthday = data['birthday']
-        city = data['city']
-        state = data['state']
-        zip = data["zip"]
-        active = data['active']
-        user_name = data['user_name']
-        email = data['email']
-        password = data['password']
-
+    def create(self, first_name, last_name, birthday, city, state, zip, active, user_name, email, password):
         with connection:
             with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                 cursor.execute(CREATE_USERS_TABLE)
@@ -72,20 +60,9 @@ class User_Store:
                     connection.commit()
                     return {"message": "User successful registered"}, 201
     # Update a user            
-    def update(self, user_id):
-        data = request.get_json()
+    def update(self, user_id, first_name, last_name, birthday, city, state, zip, active, user_name, email, password):
         if user_id:
             try:
-                first_name = data['first_name']
-                last_name = data['last_name']
-                birthday = data['birthday']
-                city = data['city']
-                state = data['state']
-                zip = data['zip']
-                active = data['active']
-                user_name = data['user_name']
-                email = data['email']
-                password = data['password']
                 with connection:
                     with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                         cursor.execute(GET_USER_BY_ID, (user_id,))

@@ -7,8 +7,19 @@ store = User_Store()
 
 class User_Handler():
     def create_account():
+        data = request.get_json()
+        first_name = data['first_name']
+        last_name = data['last_name']
+        birthday = data['birthday']
+        city = data['city']
+        state = data['state']
+        zip = data["zip"]
+        active = data['active']
+        user_name = data['user_name']
+        email = data['email']
+        password = data['password']
         try:
-            user = store.create()
+            user = store.create(first_name, last_name, birthday, city, state, zip, active, user_name, email, password)
             if user:
                 return user
         except Exception as e:
@@ -33,8 +44,19 @@ class User_Handler():
 
     def update_user(id):
         user_id = id
+        data = request.get_json()
+        first_name = data['first_name']
+        last_name = data['last_name']
+        birthday = data['birthday']
+        city = data['city']
+        state = data['state']
+        zip = data['zip']
+        active = data['active']
+        user_name = data['user_name']
+        email = data['email']
+        password = data['password']
         try:
-            user = store.update(user_id)
+            user = store.update(user_id, first_name, last_name, birthday, city, state, zip, active, user_name, email, password)
             if user:
                 return {"updated user": user}
         except Exception as e:
