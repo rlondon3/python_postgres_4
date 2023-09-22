@@ -1,4 +1,9 @@
 from models.user import User_Store
+from app import secret_key
+from flask import request, make_response, jsonify
+from datetime import datetime, timedelta
+import jwt
+
 
 store = User_Store()
 
@@ -45,7 +50,25 @@ class User_Handler():
                 return user
         except Exception as e:
             return {"error": str(e)}
+    def auth_user():
+        try:
+            data = request.get_json()
+            username = data['username']
+            password = data['password']
+            authenticated_user = store.authenticate(username, password)
+            if authenticated_user is None:
+                return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication Failed"'})
+            else:
+                token = jwt.encode({
+                    'user': authenticated_user['username'],
+                    'expiration': str(datetime.utcnow() + timedelta(seconds=60))
 
+                },
+                secret_key)
+                return jsonify({"token": token.decode('utf-8')})
+
+        except Exception as e:
+            return {"error": str(e)}
 
 def user_route(app):
     app.add_url_rule("/users/signup", "create_user", User_Handler.create_account, methods=["POST"])
