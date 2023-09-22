@@ -69,7 +69,7 @@ class User_Handler():
 
         except Exception as e:
             return {"error": str(e)}
-
+        
 def user_route(app):
     app.add_url_rule("/users/signup", "create_user", User_Handler.create_account, methods=["POST"])
     app.add_url_rule("/admin/users", "show_users", User_Handler.get_users, methods=["POST"]) #ADD AUTH

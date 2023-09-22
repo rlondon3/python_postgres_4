@@ -4,7 +4,7 @@ from database import connect
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY']
+secret_key = app.config['SECRET_KEY']
 
 @app.get("/")
 def connect_db():
