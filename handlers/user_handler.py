@@ -1,6 +1,6 @@
 from models.user import User_Store
 from flask import request, make_response, jsonify
-from services.authenticate import generate_auth_token, verify_auth_token 
+from services.authenticate import generate_auth_token, authenticate_user_id
 
 
 store = User_Store()
@@ -70,6 +70,7 @@ class User_Handler():
                 return user
         except Exception as e:
             return {"error": str(e)}
+        
     def authenticate():
         try:
             data = request.get_json()
@@ -79,7 +80,6 @@ class User_Handler():
             if authenticated_user is None:
                 return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication Failed"'})
             else:
-                print(authenticated_user['user'][0])
                 token = generate_auth_token(authenticated_user['user'][0])
                 return jsonify({"token": token}) 
 

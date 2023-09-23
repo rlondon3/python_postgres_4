@@ -13,6 +13,7 @@ load_dotenv()
 
 #Instantiate a class that holds user schema as methods
 class User_Store:
+    User: None
     # Get all users
     def index(self): 
         with connection:
@@ -93,6 +94,7 @@ class User_Store:
                 return {
                     {"error": str(e)}
                 }
+    #authenticate user
     def authenticate(self, username, password):
         try:
             with connection:
@@ -102,6 +104,7 @@ class User_Store:
                     if user:
                         hashed_password = user['password']
                         if check_password_hash(hashed_password, password):
+                            User_Store.User = user
                             return {"user": user}
                     else:
                         return {"message": "Account not found!"}
